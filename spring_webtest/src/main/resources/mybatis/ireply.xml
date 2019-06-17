@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="spring.model.ImgUp.oImgUpInter">
+
+<select id="rcount" parameterType="int" resultType="int">
+select count(*) from ireply
+where imgno = #{imgno}
+</select>
+
+<insert id="create" parameterType="IreplyDTO">
+<selectKey keyProperty="inum" resultType="int"
+order="BEFORE">
+select nvl(max(inum),0)+1 from reply
+</selectKey>
+
+insert into reply(inum, content, regdate, id, imgno)
+values(#{inum},#{content},sysdate,#{id},#{imgno})
+
+</insert>
+
+<select id="read" parameterType="int" resultType="IreplyDTO">
+select * from reply
+where inum=#{inum}
+</select>
+
+<update id="update" parameterType="IreplyDTO">
+	update reply
+	set content = #{content}
+	where inum=#{inum}
+</update>
+
+<delete id="delete" parameterType="int">
+delete from reply
+where inum=#{inum}
+</delete>
+
+<select id="list" parameterType="Map" resultType="IreplyDTO">
+ select inum, content, to_char(regdate, 'yyyy-mm-dd') regdate,
+ id, imgno, r
+ from(
+ select inum, content, regdate, id, imgno, rownum r
+ from(
+ select inum, content, regdate, id, imgno from reply
+ where imgno=#{imgno}
+ order by inum desc
+ )
+)
+<![CDATA[
+where r>= #{sno} and r <= #{eno}
+]]>
+
+</select>
+
+<select id="total" parameterType="int" resultType="int">
+select count(*) from reply
+where imgno=#{imgno}
+</select>
+
+</mapper>
